@@ -1,0 +1,15 @@
+{
+    "fileLocations": [
+      {
+        "URIs": [
+          "s3://batch-job-us-crime-iu/data/Ergebnis.csv"
+        ]
+      }
+    ],
+    "globalUploadSettings": {
+      "format": "CSV",
+      "delimiter": ",",
+      "textqualifier": "\"",
+      "containsHeader": "true"
+    }
+  }
