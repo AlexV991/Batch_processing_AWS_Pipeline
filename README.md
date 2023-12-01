@@ -13,29 +13,42 @@ Die Batch-Pipeline wurde komplett im AWS-Ökosystem entwickelt und mithilfe von 
 
 ## 1. Data Ingestion Layer
 Eine lokal gespeicherte CSV_Datei wird hithilfe eines Python- und Terraform-Skript in die AWS-Cloud-Umgebung migriert.<br>
-Dabei dient das **Terraform-Skript** dazu die benötigten AWS-Services zu erstellten. Es werden folgende AWS-Services erstellt: S3-Bucket, Lambda-Funktion, Glue, Identity and Access Management (IAM) & Key Management Service (KMS). Das **Python-Skript** dient dazu die lokal gespeichert CSV-Datei, das AWS-Glue-Skript und das Manifest für QuickView in den durch Terraform erstellten S3-Bucket hochzuladen. <br>
+Dabei dient das **Terraform-Skript** dazu die benötigten AWS-Services zu erstellten. Es werden folgende AWS-Services erstellt: S3-Bucket, Lambda-Funktion, Glue, Identity and Access Management (IAM) & Key Management Service (KMS). Das **Python-Skript** dient dazu die lokal gespeichert CSV-Datei, das AWS-Glue-Skript und das Manifest für QuickSight in den durch Terraform erstellten S3-Bucket hochzuladen. <br>
 Um die AWS-Umgebung zu erstellen und das Python-Skript auszuführen müssen vorher zwei manuelle Schritte durchgeführt werden. <br>
 
-**Das Bash-Skript ausführbar machen**
+**Das Bash-Skript ausführbar machen** <br>
+Zuerst muss das Bash-Skript angepasst werden, wobei der genaue Pfad der Ausführung definiert wird.
+```
+#apply Terraform- change the path! 
+cd /Users/path-to-folder/Batch_Pipeline_AWS/terraform
+terraform init
+terraform plan -out=plan.out
+terraform apply -auto-approve plan.out
+
+#cron job to upload script - change the path! 
+cd /Users/path-to-folder/Batch_Pipeline_AWS/upload
+python3 upload_s3.py
+```
+Anschließend muss das Bash-Skript ausführbar gemacht werden. 
 ```
 chmod +x /path-to-script-file/run_terraform_python.sh
 ```
 Dabei muss `/path-to-script-file/`durch den genauen Pfad zum lokal abgelegten Bash-Skript ersetzt werden. <br>
 
-Anschleßend kann der CronJob definiert werden, um das Skript in einem festen Intervall hochzuladen. <br>
+Darauf folgend kann der CronJob definiert werden, um das Skript in einem festen Intervall hochzuladen. <br>
 ```
 0 0 15 1-12/3 * /path-to-script-file/run_terraform_python.sh
 ```
-Wieder muss `/path-to-script-file/` durch den genauen Pfad zum lokal abgelegten Bash-Skript ersetzt werden. Dieser Befehl führt dazu, dass das Bash-Skript alle drei Monate, jeweils am 15 Tag des Monats um 00:00 Uhr ausgeführt wird. Das Intervall durch Anpassung des Codes dabei flexibel verändert werden. 
+Wieder muss `/path-to-script-file/` durch den genauen Pfad zum lokal abgelegten Bash-Skript ersetzt werden. Dieser Befehl führt dazu, dass das Bash-Skript alle drei Monate, jeweils am 15 Tag des Monats um 00:00 Uhr ausgeführt wird. Das Intervall kann durch Anpassung des Codes flexibel verändert werden. 
 
 ## 2. Data Storage Layer 
-Nachdem die CSV hochgeladen wurde, wird diese in einem S3 gespeichert.
+Nachdem die CSV (Crime_Data_from_2020_to_Present.csv) hochgeladen wurde, wird diese in einem S3-Bucket gespeichert. Ebenso dient der S3-Bucket als Speicherort für das Manifest (crime_data_manifest.json), das AWS-Glue-Skript (script_glue.py) und dem Ergebnis der Datenverarbeitung mit AWS-Glue (glue_result.csv). Um eine möglichst umfassende Datensicherheit zu gewährleisten werden durch **Amazon KMS** alle eingehenden Daten vor der Speicherung auf verschlüsselt und bei der weiter wieder entschlüsselt. 
 
 ## 3. Data Processing Layer
-Verarbeitung der CSV-Datei mithilfe von Amazon Glue. Dabei wird das im Ingestion Layer hochgeladene Verarbeitungsskript ausgeführt, welches einen Datensatz erzeugt, der die kumulierte Anzahl der Verbrechen pro Tag seit 01/2020 enthält.Das Ergebnis wird anschließend wieder in dem S3-Bucket gespeichert.
+Im nächsten Schritt wird die CSV-Datei mithilfe von Amazon Glue verarbeitet. Dabei wird das im Ingestion Layer hochgeladene Verarbeitungsskript ausgeführt (script_glue.py), welches einen Datensatz erzeugt, der die kumulierte Anzahl der Verbrechen pro Tag seit 01/2020 enthält (glue_result.csv). Das Ergebnis wird anschließend wieder in dem S3-Bucket gespeichert. . 
 
 ## 4. Presentation Layer
-Das Ergebnis der Verarbeitung durch Amazon Glue wird im Anschluss in Form eines Liniendiagramm mithilfe von Amazon QuickView dargestellt. Hierzu wird das in den S3-Bucket hochgeladene Manifest benötigt. 
+Das Ergebnis der Verarbeitung durch Amazon Glue wird im Anschluss in Form eines Liniendiagramm mithilfe von Amazon QuickSight dargestellt. Hierzu wird das in den S3-Bucket hochgeladene Manifest benötigt, um Amazon QuickSight zugriff auf glue_result.csv zu gewährleisten. 
 
 ## 5. Orchestierung
 Das Python-Skript wird in einem definierten Abstand von drei Monaten ausgeführt. Hierzu wird das Bash-Skript verwendet welches in einem dreimonatigen Intervall einen CronJob ausführt. Ebenso überwacht die Lambda-Funktion den S3-Bucket, um die Verarbeitung der CSV-Datei mit Amazon Glue auszuführen, sobald eine neue Version der CSV-Datei hochgeladen wurde. 
