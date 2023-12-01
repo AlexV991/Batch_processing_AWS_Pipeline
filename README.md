@@ -70,7 +70,7 @@ Nachdem der IAM-Benutzer erstellt wurde, müssen der Access Key und der Secret A
 ### 4. AWS CLI einrichten
 Anschließend kann die AWS CLI genutzt werden. Hier muss diese installiert werden.
 ```
-pip install awscli
+pip install aws cli
 ```
 Darauffolgend kann diese konfiguriert werden. 
 ```
