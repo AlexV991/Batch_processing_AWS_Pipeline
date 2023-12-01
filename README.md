@@ -31,13 +31,13 @@ python3 upload_s3.py
 ```
 Anschließend muss das Bash-Skript ausführbar gemacht werden. 
 ```
-chmod +x /path-to-script-file/run_terraform_python.sh
+chmod +x /path-to-script-file/start_batch.sh
 ```
 Dabei muss `/path-to-script-file/`durch den genauen Pfad zum lokal abgelegten Bash-Skript ersetzt werden. <br>
 
 Darauf folgend kann der CronJob definiert werden, um das Skript in einem festen Intervall hochzuladen. <br>
 ```
-0 0 15 1-12/3 * /path-to-script-file/run_terraform_python.sh
+0 0 15 1-12/3 * /path-to-script-file/start_batch.sh
 ```
 Wieder muss `/path-to-script-file/` durch den genauen Pfad zum lokal abgelegten Bash-Skript ersetzt werden. Dieser Befehl führt dazu, dass das Bash-Skript alle drei Monate, jeweils am 15. Tag des Monats um 00:00 Uhr ausgeführt wird. Das Intervall kann durch Anpassung des Codes flexibel verändert werden. 
 
