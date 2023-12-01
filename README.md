@@ -56,7 +56,7 @@ Das Python-Skript wird in einem definierten Abstand von drei Monaten ausgeführt
 ### 6. Security
 Um die Datensicherheit zu gewährleisten werden AWS IAM und AWS KMS verwendet. **AWS IAM** dient dazu die Zugriffsberechtigungen der Services zu definieren, um ausschließlich autorisierten Nutzern und Services Zugriff auf diese zu gewährleisten. Hierzu werden für jeden Service individuelle Rollen mithilfe von Terraform erstellt. Mithilfe von **Amazon KMS** werden außerdem alle Daten auf der physischen Ebene verschlüsselt und bei Verwendung wieder entschlüsselt, um diese sicher in den S3-Bucket zu speichern. 
 
-## Einrichtung des AWS-Kontos um die Pipeline nutzen zu können
+## Einrichtung AWS-Kontos und AWS CLI
 Um die vorgestellte Batch-Pipeline nutzen zu können und die IAC Struktur nutzen zu können, müssen im vorhinein einige Einstellungen vorgenommen werden. 
 ### 1. AWS Account
 Sie müssen über einen aktiven AWS-Acocount verfügen. Sollten Sie keinen Account besitzen, können Sie sich unter folgenden Link regestrien:
