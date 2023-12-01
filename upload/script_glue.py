@@ -11,4 +11,4 @@ df['Date Rptd'] = pd.to_datetime(df['Date Rptd']).dt.date
 counts = df['Date Rptd'].value_counts()
 
 #save in new csv
-counts.to_csv('s3://batch-job-us-crime-iu/data/Ergebnis.csv', sep=',')
+counts.to_csv('s3://batch-job-us-crime-iu/data/glue_result.csv', sep=',')

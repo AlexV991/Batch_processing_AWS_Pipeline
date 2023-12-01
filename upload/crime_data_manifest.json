@@ -2,7 +2,7 @@
     "fileLocations": [
       {
         "URIs": [
-          "s3://batch-job-us-crime-iu/data/Ergebnis.csv"
+          "s3://batch-job-us-crime-iu/data/glue_result.csv"
         ]
       }
     ],
