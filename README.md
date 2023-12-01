@@ -57,6 +57,28 @@ Das Python-Skript wird in einem definierten Abstand von drei Monaten ausgeführt
 Um die Datensicherheit zu gewährleisten werden AWS IAM und AWS KMS verwendet. **AWS IAM** dient dazu die Zugriffsberechtigungen der Services zu definieren, um ausschließlich autorisierten Nutzern und Services Zugriff auf diese zu gewährleisten. Hierzu werden für jeden Service individuelle Rollen mithilfe von Terraform erstellt. Mithilfe von **Amazon KMS** werden außerdem alle Daten auf der physischen Ebene verschlüsselt und bei Verwendung wieder entschlüsselt, um diese sicher in den S3-Bucket zu speichern. 
 
 ## Einrichtung des AWS-Kontos um die Pipeline nutzen zu können
-Um die vorgestellte Batch-Pipeline nutzen zu können, müssen im vorhinein einige Einstellungen vorgenommen werdne. 
-1. AWS Account
-Sie müssen über einen aktiven AWS-Acocount verfügen. Sollten Sie keinen Account besitzen, können Sie sich unter folgenden Link regestrien <a href="[https://wwww.google.com](https://wwww.google.com](https://portal.aws.amazon.com/billing/signup?nc2=h_ct&src=header_signup&refid=3f93bdb7-cca2-4053-94a7-a03fb33c9dfa&redirect_url=https%3A%2F%2Faws.amazon.com%2Fregistration-confirmation&language=de_de#/start/email)https://portal.aws.amazon.com/billing/signup?nc2=h_ct&src=header_signup&refid=3f93bdb7-cca2-4053-94a7-a03fb33c9dfa&redirect_url=https%3A%2F%2Faws.amazon.com%2Fregistration-confirmation&language=de_de#/start/email)https://wwww.google.com](https://portal.aws.amazon.com/billing/signup?nc2=h_ct&src=header_signup&refid=3f93bdb7-cca2-4053-94a7-a03fb33c9dfa&redirect_url=https%3A%2F%2Faws.amazon.com%2Fregistration-confirmation&language=de_de#/start/email)https://portal.aws.amazon.com/billing/signup?nc2=h_ct&src=header_signup&refid=3f93bdb7-cca2-4053-94a7-a03fb33c9dfa&redirect_url=https%3A%2F%2Faws.amazon.com%2Fregistration-confirmation&language=de_de#/start/email">AWS</a>
+Um die vorgestellte Batch-Pipeline nutzen zu können und die IAC Struktur nutzen zu können, müssen im vorhinein einige Einstellungen vorgenommen werden. 
+### 1. AWS Account
+Sie müssen über einen aktiven AWS-Acocount verfügen. Sollten Sie keinen Account besitzen, können Sie sich unter folgenden Link regestrien:
+<a href="https://portal.aws.amazon.com/billing/signup?nc2=h_ct&src=header_signup&refid=3f93bdb7-cca2-4053-94a7-a03fb33c9dfa&redirect_url=https%3A%2F%2Faws.amazon.com%2Fregistration-confirmation&language=de_de#/start/email">AWS</a>
+### 2. IAM Benutzer
+- Navigieren Sie zum IAM-Dashboard
+- Erstellen Sie einen neuen IAM-Benutzer
+- Geben Sie den IAM-Benutzer die entsprechenden Berechtigungen. Der IAM-Benutzer benötigtig mindestens Zugriff auf S3, IAM, Glue, Lambda, Cloud-Watch, QuickSight.
+### 3. Access Keys
+Nachdem der IAM-Benutzer erstellt wurde, müssen der Access Key und der Secret Access Key erzeugt werden. Speichern Sie die beiden Keys an einem sicheren Ort. Der Secret Access Key wird nur einmalig erzeugt und kann danach nicht erneut in AWS abgerufen werden.
+### 4.Das AWS CLI einrichten
+Anschließend kann die AWS CLI genutzt werden. Hier muss diese installiert werden.
+```
+pip install awscli
+```
+und kann darauffolgend konfiguriert werden. 
+```
+aws configure
+Access Key ID = your Access Key
+Secret Access Key = your Secret Access Key 
+default region = your Region (eu-central-1 für Deutschland)
+default output format = json 
+```
+Nachdem die entsprechenden Informationen in der AWS CLI hinterlegt wurden, kann die Batch-Pipline mit Terraform erzeugt werden. 
+
