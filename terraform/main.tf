@@ -68,14 +68,15 @@ resource "aws_lambda_permission" "batch_crime" {
 
 #load local script lmbda_function.py to lambda
 resource "aws_lambda_function" "batch_crime_lambda" {
-  filename      = "lambda_function.py.zip"
-  source_code_hash = filebase64sha256("lambda_function.py.zip")
+  filename      = "/Users/alex/Documents/Batch_Pipeline_AWS/upload/lambda_function.py.zip"
+  source_code_hash = filebase64sha256("/Users/alex/Documents/Batch_Pipeline_AWS/upload/lambda_function.py.zip")
   function_name = "lambda_batch_crime"
   role          = aws_iam_role.iam_for_batch_lambda.arn
   handler       = "lambda_function.lambda_handler"
   runtime       = "python3.10"
-  environment {
+  environment { 
     variables = {
+    
       GLUE_JOB_NAME = aws_glue_job.glue_etl_job.name
       S3_BUCKET_NAME = aws_s3_bucket.batch_crime.id
     }

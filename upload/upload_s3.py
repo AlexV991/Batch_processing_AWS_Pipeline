@@ -8,9 +8,9 @@ csv_path = "/Users/alex/Documents/Batch_Pipeline_AWS/data"
 upload_path = "/Users/alex/Documents/Batch_Pipeline_AWS/upload"
 
 #zip Lambda function to upload to Lambda
-with zipfile.ZipFile("/Users/alex/Documents/Batch_Pipeline_AWS/terraform/lambda_function.py.zip", "w") as z:
+with zipfile.ZipFile("upload/lambda_function.py.zip", "w") as z:
     # Füge die Python-Datei hinzu
-    z.write("/Users/alex/Documents/Batch_Pipeline_AWS/terraform/lambda_function.py")
+    z.write("upload/lambda_function.py")
 
 #declare variables csv, py script & manifest
 file_csv = 'Crime_Data_from_2020_to_Present.csv'
