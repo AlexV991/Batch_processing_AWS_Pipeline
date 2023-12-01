@@ -67,7 +67,7 @@ Sie müssen über einen aktiven AWS-Acocount verfügen. Sollten Sie keinen Accou
 - Geben Sie den IAM-Benutzer die entsprechenden Berechtigungen. Der IAM-Benutzer benötigtig mindestens Zugriff auf S3, IAM, Glue, Lambda, Cloud-Watch, QuickSight.
 ### 3. Access Keys
 Nachdem der IAM-Benutzer erstellt wurde, müssen der Access Key und der Secret Access Key erzeugt werden. Speichern Sie die beiden Keys an einem sicheren Ort. Der Secret Access Key wird nur einmalig erzeugt und kann danach nicht erneut in AWS abgerufen werden.
-### 4. Das AWS CLI einrichten
+### 4. AWS CLI einrichten
 Anschließend kann die AWS CLI genutzt werden. Hier muss diese installiert werden.
 ```
 pip install awscli
