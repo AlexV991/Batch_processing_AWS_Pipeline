@@ -15,7 +15,7 @@ Die Batch-Pipeline wurde komplett im AWS-Ökosystem entwickelt und mithilfe von 
 Eine lokal gespeicherte CSV_Datei wird mithilfe eines Python- und Terraform-Skript in die AWS-Cloud-Umgebung migriert. Die hierfür verwendete CSV-Datei kann unter folgenden Link heruntergeladen werden:
 <a href="https://www.kaggle.com/datasets/sahityasetu/crime-data-in-los-angeles-2020-to-present/data">Crime Data in Los Angeles (2020 to Present)</a><br> 
 Dabei dient das **Terraform-Skript** dazu die benötigten AWS-Services zu erstellten. Es werden folgende AWS-Services erstellt: S3-Bucket, Lambda-Funktion, Glue, Identity and Access Management (IAM) & Key Management Service (KMS). Das **Python-Skript** dient dazu die lokal gespeichert CSV-Datei, das AWS-Glue-Skript und das Manifest für QuickSight in den durch Terraform erstellten S3-Bucket hochzuladen. <br>
-Um die AWS-Umgebung zu erstellen und das Python-Skript auszuführen müssen vorher mehere manuelle Schritte durchgeführt werden. <br>
+Um die AWS-Umgebung zu erstellen und das Python-Skript auszuführen müssen vorher einige manuelle Schritte durchgeführt werden. <br>
 
 **Änderung der URIs**<br>
 In den Skripten `script_glue.py und upload_s3.py` und den Manifest `crime_data_manifest.json` müssen die Pfade zu den S3-Bucket angepasst werden, sodass diese auf Ihren S3 Bucket verweisen. 
