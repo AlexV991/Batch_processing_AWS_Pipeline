@@ -2,8 +2,6 @@ import json
 import urllib.parse
 import boto3
 
-print('Loading function')
-
 s3 = boto3.client('s3')
 glue_job_name = 'glue_etl_job'
 

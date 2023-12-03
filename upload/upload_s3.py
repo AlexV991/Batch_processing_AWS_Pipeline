@@ -6,7 +6,6 @@ import pandas as pd
 csv_path = "/Users/alex/Documents/Batch_Pipeline_AWS/data"
 upload_path = "/Users/alex/Documents/Batch_Pipeline_AWS/upload"
 
-
 #declare variables csv, py script & manifest
 file_csv = 'Crime_Data_from_2020_to_Present.csv'
 script_glue = 'script_glue.py'
