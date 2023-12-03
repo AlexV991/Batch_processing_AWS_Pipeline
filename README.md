@@ -12,12 +12,35 @@ Konkret soll die Batch-Pipeline eine lokal gespeicherten CSV-Datei, die Daten zu
 Die Batch-Pipeline wurde komplett im AWS-Ökosystem entwickelt und mithilfe von Python, boto3, Pandas und Terraform umgesetzt. Dabei kann sie in verschiedene Layer unterteilt werden, die im folgenden vorgestellt werden kurz erläutert werden: 
 
 ### 1. Data Ingestion Layer
-Eine lokal gespeicherte CSV_Datei wird mithilfe eines Python- und Terraform-Skript in die AWS-Cloud-Umgebung migriert.<br>
+Eine lokal gespeicherte CSV_Datei wird mithilfe eines Python- und Terraform-Skript in die AWS-Cloud-Umgebung migriert. Die hierfür verwendete CSV-Datei kann unter folgenden Link heruntergeladen werden:
+<a href="https://www.kaggle.com/datasets/sahityasetu/crime-data-in-los-angeles-2020-to-present/data">Crime Data in Los Angeles (2020 to Present)</a><br> 
 Dabei dient das **Terraform-Skript** dazu die benötigten AWS-Services zu erstellten. Es werden folgende AWS-Services erstellt: S3-Bucket, Lambda-Funktion, Glue, Identity and Access Management (IAM) & Key Management Service (KMS). Das **Python-Skript** dient dazu die lokal gespeichert CSV-Datei, das AWS-Glue-Skript und das Manifest für QuickSight in den durch Terraform erstellten S3-Bucket hochzuladen. <br>
-Um die AWS-Umgebung zu erstellen und das Python-Skript auszuführen müssen vorher zwei manuelle Schritte durchgeführt werden. <br>
+Um die AWS-Umgebung zu erstellen und das Python-Skript auszuführen müssen vorher mehere manuelle Schritte durchgeführt werden. <br>
+
+**Änderung der URIs**<br>
+In den Skripten `script_glue.py und upload_s3.py` und den Manifest `crime_data_manifest.json` müssen die Pfade zu den S3-Bucket angepasst werden, sodass diese auf Ihren S3 Bucket verweisen. 
+```
+--crime_data_manifest.json--
+"URIs": [
+          #change this path
+          "s3://batch-job-us-crime-iu/data/glue_result.csv"
+        ]
+
+--script_glue.py--
+#read csv  - change this path!! 
+df = pd.read_csv('s3://batch-job-us-crime-iu/raw_data/Crime_Data_from_2020_to_Present.csv', sep=',', low_memory=False)
+
+#save in new csv - change this path!! 
+counts.to_csv('s3://batch-job-us-crime-iu/data/glue_result.csv', sep=',')
+
+--upload_s3.py--
+#change this path!! 
+bucket = 'batch-job-us-crime-iu'
+
+```
 
 **Das Bash-Skript ausführbar machen** <br>
-Zuerst muss das Bash-Skript angepasst werden, wobei der genaue Pfad der Ausführung definiert wird.
+Danach muss das Bash-Skript angepasst werden, wobei der genaue Pfad der Ausführung definiert wird.
 ```
 #apply Terraform- change the path! 
 cd /Users/path-to-folder/Batch_Pipeline_AWS/terraform
