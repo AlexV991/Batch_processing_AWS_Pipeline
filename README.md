@@ -36,8 +36,18 @@ counts.to_csv('s3://batch-job-us-crime-iu/data/glue_result.csv', sep=',')
 --upload_s3.py--
 #change this path!! 
 bucket = 'batch-job-us-crime-iu'
-
 ```
+<br>
+
+**Änderung des AWS-Kontos** <br>
+In den Terraform-Skript `main.tf` muss Ihr eigenes AWS-Konto hinterlegt werden, sodass hierfür die entsprechenden IAM-Rollen vergeben werden können. 
+```
+#Use IAM User - change this! 
+data "aws_iam_user" "user" {
+  user_name = "AlexVoelkening"
+}
+```
+<br>
 
 **Das Bash-Skript ausführbar machen** <br>
 Danach muss das Bash-Skript angepasst werden, wobei der genaue Pfad der Ausführung definiert wird.
