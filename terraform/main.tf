@@ -1,11 +1,11 @@
 #Use IAM User - change this! 
-data "aws_iam_user" "user_AlexVoelkening" {
+data "aws_iam_user" "user" {
   user_name = "AlexVoelkening"
 }
 
 #Create IAM Policy
-resource "aws_iam_policy" "IAM_policy_AlexVoelkening" {
-  name        = "IAM_policy_AlexVoelkening"
+resource "aws_iam_policy" "IAM_policy_user" {
+  name        = "IAM_policy_AM_policy_user"
   description = "Policy, die dem Benutzer Zugriff auf CloudTrail, KMS, IAM, AWS Glue, S3, QuickSight und Lambda gibt"
   policy = <<EOF
 {
@@ -30,9 +30,9 @@ EOF
 }
 
 #Attach IAM Policy to user
-resource "aws_iam_user_policy_attachment" "IAM_policy_AlexVoelkening" {
-  user       = data.aws_iam_user.user_AlexVoelkening.user_name
-  policy_arn = aws_iam_policy.IAM_policy_AlexVoelkening.arn
+resource "aws_iam_user_policy_attachment" "IAM_policy" {
+  user       = data.aws_iam_user.user.user_name
+  policy_arn = aws_iam_policy.IAM_policy_user.arn
 }
 
 #Create KMS & define policy
