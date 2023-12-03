@@ -1,10 +1,63 @@
+#KMS
+resource "aws_kms_key" "batch_key" {
+  description             = "KMS key for Batch"
+  deletion_window_in_days = 10
+  enable_key_rotation     = true
+  policy                  = jsonencode(
+    {
+  "Version": "2012-10-17",
+  "Id": "key-default-1",
+  "Statement": [
+    {
+      "Sid": "Enable IAM User Permissions",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::941177638899:root"
+      },
+      "Action": "kms:*",
+      "Resource": "*"
+    },
+    {
+      "Sid": "Allow access for AWS S3",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "s3.amazonaws.com"
+      },
+      "Action": [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:DescribeKey"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "Allow access for AWS QuickSight",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "quicksight.amazonaws.com"
+      },
+      "Action": [
+        "kms:Decrypt",
+        "kms:DescribeKey"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+  )
+  tags = {
+    Name = "batch_key"
+  }
+}
+
 #S3 Bucket 
 #Create S3 Bucket in AWS 
 resource "aws_s3_bucket" "batch_crime" {
   bucket = "batch-job-us-crime-iu"
 }
 
-#
 resource "aws_s3_bucket_ownership_controls" "batch_crime" {
   bucket = aws_s3_bucket.batch_crime.id
   rule {
@@ -24,6 +77,18 @@ resource "aws_s3_bucket_versioning" "versioning" {
   bucket = aws_s3_bucket.batch_crime.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+#use KMS with S3
+resource "aws_s3_bucket_server_side_encryption_configuration" "batch_crime" {
+  bucket = aws_s3_bucket.batch_crime.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = aws_kms_key.batch_key.arn
+      sse_algorithm     = "aws:kms"
+    }
   }
 }
 
@@ -68,8 +133,8 @@ resource "aws_lambda_permission" "batch_crime" {
 
 #load local script lmbda_function.py to lambda
 resource "aws_lambda_function" "batch_crime_lambda" {
-  filename      = "/Users/alex/Documents/Batch_Pipeline_AWS/upload/lambda_function.py.zip"
-  source_code_hash = filebase64sha256("/Users/alex/Documents/Batch_Pipeline_AWS/upload/lambda_function.py.zip")
+  filename      = "/Users/alex/Documents/Batch_Pipeline_AWS/lambda/lambda_function.py.zip"
+  source_code_hash = filebase64sha256("/Users/alex/Documents/Batch_Pipeline_AWS/lambda/lambda_function.py.zip")
   function_name = "lambda_batch_crime"
   role          = aws_iam_role.iam_for_batch_lambda.arn
   handler       = "lambda_function.lambda_handler"
@@ -106,16 +171,68 @@ resource "aws_glue_job" "glue_etl_job" {
   }
 }
 
+resource "aws_glue_security_configuration" "glue_etl_job_security" {
+  name = "glue_etl_job_security"
+  encryption_configuration {
+    cloudwatch_encryption {
+      cloudwatch_encryption_mode = "DISABLED"
+    }
+
+    job_bookmarks_encryption {
+      job_bookmarks_encryption_mode = "DISABLED"
+    }
+
+    s3_encryption {
+      kms_key_arn        = aws_kms_key.batch_key.arn
+      s3_encryption_mode = "SSE-KMS"
+    }
+  }
+}
+
 
 #IAM Roles for the Project 
 
-#IAM for AWS Glue 
+data "aws_iam_user" "user_AlexVoelkening" {
+  user_name = "AlexVoelkening"
+}
 
+# Erstelle eine IAM Richtlinie, die dem Benutzer Zugriff auf die gewünschten Dienste gibt
+resource "aws_iam_policy" "IAM_policy_AlexVoelkening" {
+  name        = "IAM_policy_AlexVoelkening"
+  description = "Eine Richtlinie, die dem Benutzer Zugriff auf CloudTrail, AWS Glue, S3, QuickSight und Lambda gibt"
+
+  # Definiere die Zugriffsrichtlinie mit den entsprechenden Aktionen und Ressourcen
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "cloudtrail:*",
+        "glue:*",
+        "s3:*",
+        "quicksight:*",
+        "lambda:*",
+        "iam:*",
+        "kms:*" 
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+}
+
+# Hänge die IAM Policy an den Benutzer an
+resource "aws_iam_user_policy_attachment" "IAM_policy_AlexVoelkening" {
+  user       = data.aws_iam_user.user_AlexVoelkening.user_name
+  policy_arn = aws_iam_policy.IAM_policy_AlexVoelkening.arn
+}
+#IAM for AWS Glue
 #IAM role for AWS Glue
 resource "aws_iam_role" "batch_glue_role" {
   name = "batch_glue_role"
-
-  # Use inline block instead of jsonencode
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -123,14 +240,14 @@ resource "aws_iam_role" "batch_glue_role" {
         Action = "sts:AssumeRole"
         Effect = "Allow"
         Principal = {
-          Service = "glue.amazonaws.com"
+        Service = "glue.amazonaws.com"
         }
       },
     ]
   })
 }
 
-# Create S3 policy 
+# Create policy 
 resource "aws_iam_policy" "s3_batch_policy" {
   name        = "s3_batch_policy"
   description = "Allow to access S3 buckets"
@@ -141,6 +258,11 @@ resource "aws_iam_policy" "s3_batch_policy" {
       {
         "Effect": "Allow",
         "Action": [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:DescribeKey",
           "s3:GetObject",
           "s3:PutObject",
           "s3:ListBucket"
@@ -211,3 +333,67 @@ resource "aws_iam_role_policy_attachment" "glue_service_role" {
   role       = aws_iam_role.iam_for_batch_lambda.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"
 }
+
+#IAM role for QuickSight
+resource "aws_iam_role" "batch_quicksight_role" {
+  name = "batch_quicksight_role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "quicksight.amazonaws.com"
+
+        }
+      },
+    ]
+  })
+}
+
+# Create policy Quicksight
+resource "aws_iam_policy" "IAM_for_quicksight" {
+  name        = "IAM_for_quicksight"
+  description = "Allow to access S3 buckets & Decrypt KMS"
+  policy      = <<-EOF
+  {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+        "kms:Encrypt",
+        "kms:Decrypt",
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:ListBucket"
+        ],
+        "Resource": "*"
+      }
+    ]
+  }
+  EOF
+}
+
+# Attach policie to IAM QuickSight role 
+resource "aws_iam_policy_attachment" "QuickSight_attachment" {
+  name       = "QuickSight_attachment"
+  roles      = [aws_iam_role.batch_quicksight_role.name]
+  policy_arn = aws_iam_policy.IAM_for_quicksight.arn
+}
+
+/*
+resource "aws_quicksight_iam_policy_assignment" "quicksight_policy_attach" {
+  assignment_name   = "quicksight_policy_attach"
+  assignment_status = "ENABLED"
+  policy_arn        = aws_iam_policy.IAM_for_quicksight.arn
+}
+
+resource "aws_quicksight_user" "example" {
+  email          = "alexandervoelkening@gmail.com"
+  identity_type  = "IAM"
+  user_role      = "ADMIN"
+  iam_arn        = aws_iam_role.batch_quicksight_role.arn
+}
+*/
