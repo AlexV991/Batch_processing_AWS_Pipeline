@@ -9,7 +9,7 @@ Konkret soll die Batch-Pipeline eine lokal gespeicherten CSV-Datei, die Daten zu
 ## Die Batch-Pipeline
 <img width="1916" alt="image" src="https://github.com/AlexV991/Batch_processing_AWS_Pipeline/assets/70948466/e708f330-28b3-4fc6-90a0-73a335a6b547">
 
-Die Batch-Pipeline wurde komplett im AWS-Ökosystem entwickelt und mithilfe von Python, boto3, Pandas und Terraform umgesetzt. Dabei kann sie in verschiedene Layer unterteilt werden, die im folgenden vorgestellt werden kurz erläutert werden: 
+Die Batch-Pipeline wurde komplett im AWS-Ökosystem entwickelt und mithilfe von Python, boto3, Pandas und Terraform umgesetzt. Dabei kann sie in verschiedene Layer unterteilt werden, die im folgenden vorgestellt werden: 
 
 ### 1. Data Ingestion Layer
 Eine lokal gespeicherte CSV_Datei wird mithilfe eines Python- und Terraform-Skript in die AWS-Cloud-Umgebung migriert. Die hierfür verwendete CSV-Datei kann unter folgenden Link heruntergeladen werden:
