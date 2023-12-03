@@ -75,22 +75,22 @@ Darauf folgend kann der CronJob definiert werden, um das Skript in einem festen 
 Wieder muss `/path-to-script-file/` durch den genauen Pfad zum lokal abgelegten Bash-Skript ersetzt werden. Dieser Befehl führt dazu, dass das Bash-Skript alle drei Monate, jeweils am 15. Tag des Monats um 00:00 Uhr ausgeführt wird. Das Intervall kann durch Anpassung des Codes flexibel verändert werden. 
 
 ### 2. Data Storage Layer 
-Nachdem die CSV (Crime_Data_from_2020_to_Present.csv) hochgeladen wurde, wird diese in einem S3-Bucket gespeichert. Ebenso dient der S3-Bucket als Speicherort für das Manifest (crime_data_manifest.json), das AWS-Glue-Skript (script_glue.py) und dem Ergebnis der Datenverarbeitung mit AWS-Glue (glue_result.csv). Um eine möglichst umfassende Datensicherheit zu gewährleisten werden durch **Amazon KMS** alle eingehenden Daten vor der Speicherung auf verschlüsselt und bei der weiter wieder entschlüsselt. 
+Nachdem die CSV (Crime_Data_from_2020_to_Present.csv) hochgeladen wurde, wird diese in einem S3-Bucket gespeichert. Ebenso dient der S3-Bucket als Speicherort für das Manifest (crime_data_manifest.json), das AWS-Glue-Skript (script_glue.py) und dem Ergebnis der Datenverarbeitung mit AWS-Glue (glue_result.csv). Um eine möglichst umfassende Datensicherheit zu gewährleisten werden durch **Amazon KMS** alle eingehenden Daten vor der Speicherung verschlüsselt und zur weiteren Verarbeitung wieder entschlüsselt. 
 
 ### 3. Data Processing Layer
-Im nächsten Schritt wird die CSV-Datei mithilfe von Amazon Glue verarbeitet. Dabei wird das im Ingestion Layer hochgeladene Verarbeitungsskript ausgeführt (script_glue.py), welches einen Datensatz erzeugt, der die kumulierte Anzahl der Verbrechen pro Tag seit 01/2020 enthält (glue_result.csv). Das Ergebnis wird anschließend wieder in dem S3-Bucket gespeichert. . 
+Im nächsten Schritt wird die CSV-Datei mithilfe von Amazon Glue verarbeitet. Dabei wird das im Ingestion Layer hochgeladene Verarbeitungsskript ausgeführt (script_glue.py), welches einen Datensatz erzeugt, der die kumulierte Anzahl der Verbrechen pro Tag seit 01/2020 enthält (glue_result.csv). Das Ergebnis wird anschließend wieder in dem S3-Bucket gespeichert.
 
 ### 4. Presentation Layer
-Das Ergebnis der Verarbeitung durch Amazon Glue wird im Anschluss in Form eines Liniendiagramms mithilfe von Amazon QuickSight dargestellt. Hierzu wird das in den S3-Bucket hochgeladene Manifest benötigt, um Amazon QuickSight zugriff auf glue_result.csv zu gewährleisten. 
+Das Ergebnis der Verarbeitung durch Amazon Glue wird im Anschluss in Form eines Liniendiagramms mithilfe von Amazon QuickSight dargestellt. Hierzu wird das in den S3-Bucket hochgeladene Manifest benötigt, um Amazon QuickSight Zugriff auf glue_result.csv zu gewährleisten. 
 
 ### 5. Orchestierung
 Das Python-Skript wird in einem definierten Abstand von drei Monaten ausgeführt. Hierzu wird das Bash-Skript verwendet welches in einem dreimonatigen Intervall einen CronJob ausführt. Ebenso überwacht die Lambda-Funktion den S3-Bucket, um die Verarbeitung der CSV-Datei mit Amazon Glue auszuführen, sobald eine neue Version der CSV-Datei hochgeladen wurde. 
 
 ### 6. Security
-Um die Datensicherheit zu gewährleisten werden AWS IAM und AWS KMS verwendet. **AWS IAM** dient dazu die Zugriffsberechtigungen der Services zu definieren, um ausschließlich autorisierten Nutzern und Services Zugriff auf diese zu gewährleisten. Hierzu werden für jeden Service individuelle Rollen mithilfe von Terraform erstellt. Mithilfe von **Amazon KMS** werden außerdem alle Daten auf der physischen Ebene verschlüsselt und bei Verwendung wieder entschlüsselt, um diese sicher in den S3-Bucket zu speichern. 
+Um die Datensicherheit zu gewährleisten werden AWS IAM und AWS KMS verwendet. **AWS IAM** dient dazu die Zugriffsberechtigungen der Services zu definieren, um ausschließlich autorisierten Nutzern und Services Zugriff auf diese zu gewährleisten. Hierzu werden für jeden Service individuelle Rollen erstellt. Mithilfe von **Amazon KMS** werden außerdem alle Daten auf der physischen Ebene verschlüsselt und bei Verwendung wieder entschlüsselt, um diese sicher in den S3-Bucket zu speichern. 
 
 ## Einrichtung AWS-Kontos und AWS CLI
-Um die vorgestellte Batch-Pipeline nutzen zu können und die IAC Struktur nutzen zu können, müssen im Vorhinein einige Einstellungen vorgenommen werden. 
+Um die vorgestellte Batch-Pipeline und die IAC-Struktur nutzen zu können, müssen im Vorhinein einige Einstellungen vorgenommen werden. 
 ### 1. AWS Account
 Sie müssen über einen aktiven AWS-Acocount verfügen. Sollten Sie keinen Account besitzen, können Sie sich unter folgenden Link registrieren:
 <a href="https://portal.aws.amazon.com/billing/signup?nc2=h_ct&src=header_signup&refid=3f93bdb7-cca2-4053-94a7-a03fb33c9dfa&redirect_url=https%3A%2F%2Faws.amazon.com%2Fregistration-confirmation&language=de_de#/start/email">AWS</a>
@@ -114,4 +114,3 @@ default region = your Region (eu-central-1 für Deutschland)
 default output format = json 
 ```
 Nachdem die entsprechenden Informationen in der AWS CLI hinterlegt wurden, kann die Batch-Pipline mit Terraform erzeugt werden. 
-
