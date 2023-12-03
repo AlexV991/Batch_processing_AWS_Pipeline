@@ -3,8 +3,8 @@ import boto3
 import pandas as pd
 
 #documents path
-csv_path = "/Users/alex/Documents/Batch_Pipeline_AWS/data"
-upload_path = "/Users/alex/Documents/Batch_Pipeline_AWS/upload"
+csv_path = os. getcwd() + "/data"
+upload_path = os. getcwd() + "/upload"
 
 #declare variables csv, py script & manifest
 file_csv = 'Crime_Data_from_2020_to_Present.csv'
@@ -13,6 +13,7 @@ json_manifest = 'crime_data_manifest.json'
 
 #set variables for S3
 client = boto3.client('s3')
+#change this path!! 
 bucket = 'batch-job-us-crime-iu'
 
 #get file path of csv, script & manifest 

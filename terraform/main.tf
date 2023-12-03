@@ -1,4 +1,41 @@
-#KMS
+#Use IAM User - change this! 
+data "aws_iam_user" "user_AlexVoelkening" {
+  user_name = "AlexVoelkening"
+}
+
+#Create IAM Policy
+resource "aws_iam_policy" "IAM_policy_AlexVoelkening" {
+  name        = "IAM_policy_AlexVoelkening"
+  description = "Policy, die dem Benutzer Zugriff auf CloudTrail, KMS, IAM, AWS Glue, S3, QuickSight und Lambda gibt"
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "cloudtrail:*",
+        "glue:*",
+        "s3:*",
+        "quicksight:*",
+        "lambda:*",
+        "iam:*",
+        "kms:*" 
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+}
+
+#Attach IAM Policy to user
+resource "aws_iam_user_policy_attachment" "IAM_policy_AlexVoelkening" {
+  user       = data.aws_iam_user.user_AlexVoelkening.user_name
+  policy_arn = aws_iam_policy.IAM_policy_AlexVoelkening.arn
+}
+
+#Create KMS & define policy
 resource "aws_kms_key" "batch_key" {
   description             = "KMS key for Batch"
   deletion_window_in_days = 10
@@ -133,8 +170,8 @@ resource "aws_lambda_permission" "batch_crime" {
 
 #load local script lmbda_function.py to lambda
 resource "aws_lambda_function" "batch_crime_lambda" {
-  filename      = "/Users/alex/Documents/Batch_Pipeline_AWS/lambda/lambda_function.py.zip"
-  source_code_hash = filebase64sha256("/Users/alex/Documents/Batch_Pipeline_AWS/lambda/lambda_function.py.zip")
+  filename      = "lambda/lambda_function.py.zip"
+  source_code_hash = filebase64sha256("lambda/lambda_function.py.zip")
   function_name = "lambda_batch_crime"
   role          = aws_iam_role.iam_for_batch_lambda.arn
   handler       = "lambda_function.lambda_handler"
@@ -189,46 +226,7 @@ resource "aws_glue_security_configuration" "glue_etl_job_security" {
   }
 }
 
-
 #IAM Roles for the Project 
-
-data "aws_iam_user" "user_AlexVoelkening" {
-  user_name = "AlexVoelkening"
-}
-
-# Erstelle eine IAM Richtlinie, die dem Benutzer Zugriff auf die gewünschten Dienste gibt
-resource "aws_iam_policy" "IAM_policy_AlexVoelkening" {
-  name        = "IAM_policy_AlexVoelkening"
-  description = "Eine Richtlinie, die dem Benutzer Zugriff auf CloudTrail, AWS Glue, S3, QuickSight und Lambda gibt"
-
-  # Definiere die Zugriffsrichtlinie mit den entsprechenden Aktionen und Ressourcen
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "cloudtrail:*",
-        "glue:*",
-        "s3:*",
-        "quicksight:*",
-        "lambda:*",
-        "iam:*",
-        "kms:*" 
-      ],
-      "Resource": "*"
-    }
-  ]
-}
-EOF
-}
-
-# Hänge die IAM Policy an den Benutzer an
-resource "aws_iam_user_policy_attachment" "IAM_policy_AlexVoelkening" {
-  user       = data.aws_iam_user.user_AlexVoelkening.user_name
-  policy_arn = aws_iam_policy.IAM_policy_AlexVoelkening.arn
-}
 #IAM for AWS Glue
 #IAM role for AWS Glue
 resource "aws_iam_role" "batch_glue_role" {
@@ -247,7 +245,7 @@ resource "aws_iam_role" "batch_glue_role" {
   })
 }
 
-# Create policy 
+# Create S3 policy 
 resource "aws_iam_policy" "s3_batch_policy" {
   name        = "s3_batch_policy"
   description = "Allow to access S3 buckets"
@@ -382,18 +380,3 @@ resource "aws_iam_policy_attachment" "QuickSight_attachment" {
   roles      = [aws_iam_role.batch_quicksight_role.name]
   policy_arn = aws_iam_policy.IAM_for_quicksight.arn
 }
-
-/*
-resource "aws_quicksight_iam_policy_assignment" "quicksight_policy_attach" {
-  assignment_name   = "quicksight_policy_attach"
-  assignment_status = "ENABLED"
-  policy_arn        = aws_iam_policy.IAM_for_quicksight.arn
-}
-
-resource "aws_quicksight_user" "example" {
-  email          = "alexandervoelkening@gmail.com"
-  identity_type  = "IAM"
-  user_role      = "ADMIN"
-  iam_arn        = aws_iam_role.batch_quicksight_role.arn
-}
-*/
