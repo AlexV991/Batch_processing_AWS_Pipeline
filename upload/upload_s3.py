@@ -22,6 +22,6 @@ file_path_script_glue = os.path.join(upload_path, script_glue)
 file_path_json_manifest = os.path.join(upload_path, json_manifest)
 
 #load to s3
-client.upload_file(file_path_csv, bucket, 'raw_data/'+file_csv)
 client.upload_file(file_path_script_glue, bucket, 'script/'+script_glue)
 client.upload_file(file_path_json_manifest, bucket, 'manifest/'+json_manifest)
+client.upload_file(file_path_csv, bucket, 'raw_data/'+file_csv)
